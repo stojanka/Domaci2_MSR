@@ -113,7 +113,7 @@ MODULE_DEVICE_TABLE(of, timer_of_match);
 // INTERRUPT SERVICE ROUTINE
 static irqreturn_t xilaxitimer_isr(int irq,void*dev_id){
 	unsigned int data = 0;
-
+	printk(KERN_WARNING "Timer: Isteklo vreme!");
 	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
 	iowrite32(data | XIL_AXI_TIMER_CSR_INT_OCCURED_MASK,
 				tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
@@ -150,7 +150,7 @@ static irqreturn_t xilaxitimer_isr(int irq,void*dev_id){
 		iowrite32(data & ~(XIL_AXI_TIMER_CSR_LOAD_MASK),
 				tp->base_addr + XIL_AXI_TIMER_TCSR1_OFFSET);
 
-		printk(KERN_WARNING "Timer: Isteklo vreme!");
+
 	//}
 
 	return IRQ_HANDLED;
