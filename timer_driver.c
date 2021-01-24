@@ -467,7 +467,7 @@ static int __init timer_init(void)
 <<<<<<< HEAD
 
 =======
-			
+
 >>>>>>> c0163900bc2a557fb43f2a233f69bf4be26c8ee7
 	printk(KERN_NOTICE "xilaxitimer_init: Hello world\n");
 
