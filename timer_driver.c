@@ -118,16 +118,17 @@ static irqreturn_t xilaxitimer_isr(int irq,void*dev_id){
 	iowrite32(data | XIL_AXI_TIMER_CSR_INT_OCCURED_MASK,
 				tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
 
-				printk(KERN_WARNING "INTERRUPT OCCURED!\n");
+			
 	// Check Timer Counter Value
-	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCR1_OFFSET);
-	if(data==0){
+	//data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCR1_OFFSET);  <--------- U Xlinxovom datasheetu pise da se ISR poziva samo za timer0
+																																				//  dok zapravo se poziva samo za overflow timera 1.
+	//if(data==0){
 
 		data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
 		iowrite32(data & ~(XIL_AXI_TIMER_CSR_ENABLE_TMR_MASK),
 				tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
 		printk(KERN_WARNING "Timer: Isteklo vreme!");
-	}
+	//}
 
 	return IRQ_HANDLED;
 }
