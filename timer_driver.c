@@ -464,11 +464,7 @@ static int __init timer_init(void)
 	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
 	iowrite32(data & ~(XIL_AXI_TIMER_CSR_LOAD_MASK),
 			tp->base_addr + XIL_AXI_TIMER_TCSR1_OFFSET);
-<<<<<<< HEAD
 
-=======
-
->>>>>>> c0163900bc2a557fb43f2a233f69bf4be26c8ee7
 	printk(KERN_NOTICE "xilaxitimer_init: Hello world\n");
 
 	return platform_driver_register(&timer_driver);
