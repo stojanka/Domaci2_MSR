@@ -9,6 +9,7 @@
 #include <linux/uaccess.h>
 #include <linux/errno.h>
 #include <linux/device.h>
+#include <linux/of.h>
 
 #include <linux/io.h> //iowrite ioread
 #include <linux/slab.h>//kmalloc kfree
@@ -71,7 +72,7 @@ unsigned int startAt1 = 0;
 int secondPass = 1;
 
 static irqreturn_t xilaxitimer_isr(int irq,void*dev_id);
-static void setup_and_start_timer(unsigned int milliseconds);
+static void setup_and_start_timer(unsigned int startAt0, unsigned int startAt1);
 static int timer_probe(struct platform_device *pdev);
 static int timer_remove(struct platform_device *pdev);
 int timer_open(struct inode *pinode, struct file *pfile);
@@ -113,12 +114,17 @@ MODULE_DEVICE_TABLE(of, timer_of_match);
 static irqreturn_t xilaxitimer_isr(int irq,void*dev_id){
 	unsigned int data = 0;
 
+	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+	iowrite32(data | XIL_AXI_TIMER_CSR_INT_OCCURED_MASK,
+				tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+
 	// Check Timer Counter Value
 	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCR1_OFFSET);
 	if(data==0){
+
 		data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
-		iowrite32(data | XIL_AXI_TIMER_CSR_INT_OCCURED_MASK,
-					tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+		iowrite32(data & ~(XIL_AXI_TIMER_CSR_ENABLE_TMR_MASK),
+				tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
 		printk(KERN_WARNING "Timer: Isteklo vreme!");
 	}
 
@@ -129,8 +135,6 @@ static irqreturn_t xilaxitimer_isr(int irq,void*dev_id){
 static void setup_and_start_timer(unsigned int startAt0, unsigned int startAt1)
 {
 	// Disable Timer Counter
-	unsigned int timer_load;
-	unsigned int zero = 0;
 	unsigned int data = 0;
 
 	// Disable timer/counter while configuration is in progress
@@ -345,8 +349,8 @@ ret = copy_from_user(buff, buffer, length);
 					printk(KERN_WARNING "xilaxitimer_write: Wrong format,  expected start, stop or dd:hh:mm:ss!\n");
 					return -EFAULT;
 			}
-			startAt0 = ((seconds+min*60+hour*60*60+day*60*60*24)%43)*100000000;
-			startAt1 = ((seconds+min*60+hour*60*60+day*60*60*24)-(startAt0/100000000))/43;
+			startAt0 = ((second+min*60+hour*60*60+day*60*60*24)%43)*100000000;
+			startAt1 = ((second+min*60+hour*60*60+day*60*60*24)-(startAt0/100000000))/43;
 
 			//------------------------------------------------------------------------
 			// Set initial value in load register
