@@ -411,7 +411,6 @@ ret = copy_from_user(buff, buffer, length);
 static int __init timer_init(void)
 {
 		int ret = 0;
-		unsigned int data = 0;
 
 	ret = alloc_chrdev_region(&my_dev_id, 0, 1, DRIVER_NAME);
 	if (ret){
@@ -444,26 +443,6 @@ static int __init timer_init(void)
 		goto fail_2;
 	}
 	printk(KERN_INFO "xilaxitimer_init: Cdev added\n");
-
-	iowrite32(startAt0, tp->base_addr + XIL_AXI_TIMER_TLR_OFFSET);
-	iowrite32(startAt1, tp->base_addr + XIL_AXI_TIMER_TLR1_OFFSET);
-
-	// Load initial value into counter from load register
-	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
-	iowrite32(data | XIL_AXI_TIMER_CSR_LOAD_MASK,
-			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
-
-	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
-	iowrite32(data & ~(XIL_AXI_TIMER_CSR_LOAD_MASK),
-			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
-
-	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
-	iowrite32(data | XIL_AXI_TIMER_CSR_LOAD_MASK,
-			tp->base_addr + XIL_AXI_TIMER_TCSR1_OFFSET);
-
-	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
-	iowrite32(data & ~(XIL_AXI_TIMER_CSR_LOAD_MASK),
-			tp->base_addr + XIL_AXI_TIMER_TCSR1_OFFSET);
 
 	printk(KERN_NOTICE "xilaxitimer_init: Hello world\n");
 
