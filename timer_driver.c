@@ -118,7 +118,7 @@ static irqreturn_t xilaxitimer_isr(int irq,void*dev_id){
 	iowrite32(data | XIL_AXI_TIMER_CSR_INT_OCCURED_MASK,
 				tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
 
-			
+
 	// Check Timer Counter Value
 	//data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCR1_OFFSET);  <--------- U Xlinxovom datasheetu pise da se ISR poziva samo za timer0
 																																				//  dok zapravo se poziva samo za overflow timera 1.
@@ -127,6 +127,29 @@ static irqreturn_t xilaxitimer_isr(int irq,void*dev_id){
 		data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
 		iowrite32(data & ~(XIL_AXI_TIMER_CSR_ENABLE_TMR_MASK),
 				tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+		startAt0 = 0;
+		startAt1 = 0;
+
+		iowrite32(startAt0, tp->base_addr + XIL_AXI_TIMER_TLR_OFFSET);
+		iowrite32(startAt1, tp->base_addr + XIL_AXI_TIMER_TLR1_OFFSET);
+
+		// Load initial value into counter from load register
+		data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+		iowrite32(data | XIL_AXI_TIMER_CSR_LOAD_MASK,
+				tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+
+		data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+		iowrite32(data & ~(XIL_AXI_TIMER_CSR_LOAD_MASK),
+				tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+
+		data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+		iowrite32(data | XIL_AXI_TIMER_CSR_LOAD_MASK,
+				tp->base_addr + XIL_AXI_TIMER_TCSR1_OFFSET);
+
+		data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+		iowrite32(data & ~(XIL_AXI_TIMER_CSR_LOAD_MASK),
+				tp->base_addr + XIL_AXI_TIMER_TCSR1_OFFSET);
+
 		printk(KERN_WARNING "Timer: Isteklo vreme!");
 	//}
 
@@ -421,6 +444,27 @@ static int __init timer_init(void)
 		goto fail_2;
 	}
 	printk(KERN_INFO "xilaxitimer_init: Cdev added\n");
+
+	iowrite32(startAt0, tp->base_addr + XIL_AXI_TIMER_TLR_OFFSET);
+	iowrite32(startAt1, tp->base_addr + XIL_AXI_TIMER_TLR1_OFFSET);
+
+	// Load initial value into counter from load register
+	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+	iowrite32(data | XIL_AXI_TIMER_CSR_LOAD_MASK,
+			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+
+	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+	iowrite32(data & ~(XIL_AXI_TIMER_CSR_LOAD_MASK),
+			tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+
+	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+	iowrite32(data | XIL_AXI_TIMER_CSR_LOAD_MASK,
+			tp->base_addr + XIL_AXI_TIMER_TCSR1_OFFSET);
+
+	data = ioread32(tp->base_addr + XIL_AXI_TIMER_TCSR_OFFSET);
+	iowrite32(data & ~(XIL_AXI_TIMER_CSR_LOAD_MASK),
+			tp->base_addr + XIL_AXI_TIMER_TCSR1_OFFSET);
+			
 	printk(KERN_NOTICE "xilaxitimer_init: Hello world\n");
 
 	return platform_driver_register(&timer_driver);
